@@ -1,7 +1,25 @@
-.logo.vite:hover {
-  filter: drop-shadow(0 0 2em #747bff);
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
 }
 
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafb);
+.logo {
+  max-width: 25vw;
+  border: 1px solid black;
+}
+
+.hue {
+  background: -webkit-linear-gradient(left, red , yellow, green, blue);
+  background: -o-linear-gradient(right, red , yellow, green, blue);
+  background: -moz-linear-gradient(right, red , yellow, green, blue);
+  background: linear-gradient(to right, red , yellow, green, blue); 
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+footer {
+  margin-top: 2rem;
+  font-size: 10px;
 }

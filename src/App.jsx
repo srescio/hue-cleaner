@@ -23,6 +23,10 @@ function App() {
       <Header />
       <section>
         <input onChange={updateHueIp} placeholder='Set you hue hub IP' defaultValue={hueIp} /> {!!hueIp && (isIpValid(hueIp) ? '✅' : '❌') }
+        {!hueIp && <details>
+          <summary>How to get the IP of your Hue Hub</summary>
+          <p>Open the Hue app on your phone, go to settings, and select the Hue Bridge you want to connect to. The IP address will be listed there.</p>
+        </details>}
       </section>
       <Footer />
     </>

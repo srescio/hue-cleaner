@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import useHueContext from './Context'
 import { isIpValid } from './utils'
-import huecleaner from './assets/huecleaner.jpeg'
+import { Header, Footer } from './Components'
 import './App.css'
 
 function App() {
@@ -20,16 +20,11 @@ function App() {
 
   return (
     <>
-      <header>
-        <h1><span className='hue'>hue</span> Cleaner</h1>
-        <img src={huecleaner} className="logo" alt="Hue Cleaner" />
-      </header>
+      <Header />
       <section>
         <input onChange={updateHueIp} placeholder='Set you hue hub IP' defaultValue={hueIp} /> {!!hueIp && (isIpValid(hueIp) ? '✅' : '❌') }
       </section>
-      <footer>
-        Made by <a target="_blank" href="https://simonerescio.it">Simone Rescio</a>
-      </footer>
+      <Footer />
     </>
   )
 }

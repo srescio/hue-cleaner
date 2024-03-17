@@ -6,8 +6,8 @@
     "distDir": "../dist"
   },
   "package": {
-    "productName": "hue-cleaner",
-    "version": "0.0.0"
+    "productName": "hue Cleaner",
+    "version": "1.0.0"
   },
   "tauri": {
     "allowlist": {
@@ -19,7 +19,7 @@
     },
     "windows": [
       {
-        "title": "hue-cleaner",
+        "title": "hue Cleaner",
         "width": 800,
         "height": 600
       }

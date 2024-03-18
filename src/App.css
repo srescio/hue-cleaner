@@ -19,6 +19,16 @@
   -webkit-text-fill-color: transparent;
 }
 
+#hue-ip {
+  width: 9rem;
+}
+
+.is-valid-flag {
+  position: absolute;
+  margin: 0.5rem 0 0 -2rem;
+  pointer-events: none;
+}
+
 details {
   margin-top: 2rem;
   font-size: 1rem;

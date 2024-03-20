@@ -16,6 +16,7 @@ export function HueContextProvider({ children }) {
     const initialState = {
         hueIp,
         isIpValid: isIpValid(hueIp),
+        connectionChecked: false,
     };
 
     const [state, dispatch] = useReducer(hueReducer, initialState);

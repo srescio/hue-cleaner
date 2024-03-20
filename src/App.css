@@ -29,6 +29,11 @@
   pointer-events: none;
 }
 
+button {
+  display: block;
+  margin: 1rem auto;
+}
+
 details {
   margin-top: 2rem;
   font-size: 1rem;

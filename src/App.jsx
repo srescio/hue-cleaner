@@ -1,15 +1,13 @@
-import { Header, HueIpInput, Footer } from './Components'
+import { Header, HueIpInput, ConnectionCheck, Footer } from './Components'
 import './App.css'
 
 function App() {
-  
-  // const hueHubUrl = `https://${hueIp}`;
-
   return (
     <>
       <Header />
       <section>
         <HueIpInput />
+        <ConnectionCheck />
       </section>
       <Footer />
     </>

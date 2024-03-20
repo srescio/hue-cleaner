@@ -1,4 +1,4 @@
-import { Header, HueIpInput, ConnectionCheck, Footer } from './Components'
+import { Header, HueIpInput, ConnectionCheck, Footer, ApiKeyCheck } from './Components'
 import './App.css'
 
 function App() {
@@ -8,6 +8,7 @@ function App() {
       <section>
         <HueIpInput />
         <ConnectionCheck />
+        <ApiKeyCheck />
       </section>
       <Footer />
     </>

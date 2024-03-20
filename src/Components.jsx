@@ -17,7 +17,7 @@ export const HueIpInput = () => {
     const { state: { hueIp }, dispatch } = useHueContext()
     const updateHueIp = (e) => {
         const { value } = e.target
-        dispatch({ hueIp: value })
+        dispatch({ hueIp: value, isManualChange: true })
         if (!isIpValid(value)) return;
         localStorage.setItem('hueIp', value)
     }
@@ -42,6 +42,7 @@ export const HueIpInput = () => {
 export const ConnectionCheck = () => {
     const { state: {
         hueIp,
+        isManualChange,
         connectionChecking,
         connectionChecked,
         dismissConnectionCheck,
@@ -51,7 +52,9 @@ export const ConnectionCheck = () => {
     const hueHubDebugUrl = `https://${hueIp}/debug/clip.html`;
 
     useEffect(() => {
-        dispatch({ dismissConnectionCheck: false, connectionChecked: false });
+        if (!isManualChange) return;
+        console.log('hueIp', hueIp)
+        dispatch({ dismissConnectionCheck: false, connectionChecked: false, canConnect: false});
     }, [hueIp])
 
     const check = async () => {
@@ -66,14 +69,17 @@ export const ConnectionCheck = () => {
             connectionChecked: true,
             canConnect
         })
-        canConnect && setTimeout(() => dispatch({ dismissConnectionCheck: true }), 3500);
+        canConnect && setTimeout(() => {
+            dispatch({ dismissConnectionCheck: true })
+            localStorage.setItem('canConnect', true)
+        }, 3500);
     }
 
     if (!hueIp || !isIpValid(hueIp) || dismissConnectionCheck) return null;
 
     return (
         <article>
-            {(hueIp && isIpValid(hueIp)) &&  <button onClick={check}>Check connection</button>}
+            {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button onClick={check}>Check connection</button>}
             {connectionChecking && <p>Checking connection to Hue Hub... ⏳</p>}
             {connectionChecked && (canConnect ? <p>Connection to Hue Hub successful! ✅</p> : <>
                 <p>Connection to Hue Hub failed! ❌</p>
@@ -82,6 +88,39 @@ export const ConnectionCheck = () => {
                     <p>Make sure your Hue Hub is powered on, connected to your network, and that you have the correct IP address.</p>
                 </details>
             </>)}
+        </article>
+    )
+}
+
+export const ApiKeyCheck = () => {
+    const { state: { canConnect, apiKey }, dispatch } = useHueContext()
+
+    console.log('canConnect', canConnect)
+
+    if (!canConnect) return null;
+
+    const getApiKey = async () => {
+        dispatch({
+            fetchingKey: true
+        });
+        const canConnect = await invoke('check_hue_hub_connection', { hueHubDebugUrl });
+        dispatch({
+            connectionChecking: false,
+            connectionChecked: true,
+            canConnect
+        })
+        canConnect && setTimeout(() => dispatch({ dismissConnectionCheck: true }), 3500);
+    }
+
+    const noKey = <>
+        <p>Go to your Hue Hub and press the button on the device,<br />
+            then click the button below to generate an API key</p>
+        <button onClick={getApiKey}>Create API key</button>
+    </>;
+
+    return (
+        <article>
+            {!apiKey && noKey}
         </article>
     )
 }

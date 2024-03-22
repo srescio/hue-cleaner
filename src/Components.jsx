@@ -13,7 +13,7 @@ export const Header = () => {
   )
 }
 
-export const HueIpInput = () => {
+export const HubIpInput = () => {
     const { state: { hueIp, canConnect, connectionChecked }, dispatch } = useHueContext()
     const updateHueIp = (e) => {
         const { value } = e.target
@@ -103,30 +103,35 @@ export const ConnectionCheck = () => {
 }
 
 export const ApiKeyCheck = () => {
-    const { state: { hueIp, canConnect, apiKey, fetchingKey }, dispatch } = useHueContext()
+    const { state: { hueIp, canConnect, apiKey }, dispatch } = useHueContext()
 
     const hueHubApiUrl = `https://${hueIp}/api`;
 
     if (!canConnect) return null;
 
     const getApiKey = async () => {
-        dispatch({
-            fetchingKey: true
-        });
-        const apiKey = await invoke('get_api_key', { hueHubApiUrl });
-        console.log(apiKey);
-        dispatch({
-            fetchingKey: false
-        })
+        let apiKey = false;
+        const response = await invoke('get_api_key', { hueHubApiUrl });
+        try {
+            const jsonResponse = JSON.parse(response);
+            apiKey = jsonResponse?.at(0)?.success?.username;
+        } catch (error) {
+            console.error(error);
+        }
+        dispatch({ apiKey })
+        localStorage.setItem('apiKey', apiKey)
     }
+    
+    useEffect(() => {
+        const interval = setInterval((canConnect, apiKey) => {
+            if (canConnect && !apiKey) {
+                getApiKey()
+            }
+        }, 5000, canConnect, apiKey);
+        return () => clearInterval(interval);
+    }, [apiKey]);
 
-    const buttonCopy = fetchingKey ? 'Creating API key... ⏳' : 'Create API key';
-
-    const noKey = <>
-        <p>Go to your Hue Hub and press the button on the device,<br />
-            then click the button below to generate an API key</p>
-        <button disabled={fetchingKey} onClick={getApiKey}>{buttonCopy}</button>
-    </>;
+    const noKey = <p>Go to your Hue Hub and press the button on the device</p>;
 
     return (
         <article>

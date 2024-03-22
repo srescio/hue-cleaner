@@ -14,14 +14,14 @@ export const Header = () => {
 }
 
 export const HueIpInput = () => {
-    const { state: { hueIp }, dispatch } = useHueContext()
+    const { state: { hueIp, canConnect, connectionChecked }, dispatch } = useHueContext()
     const updateHueIp = (e) => {
         const { value } = e.target
         dispatch({ hueIp: value, isManualChange: true })
         if (!isIpValid(value)) return;
         localStorage.setItem('hueIp', value)
     }
-    const isIpValudFlag = isIpValid(hueIp) ? '✅' : '❌';
+    const canConnectFlag = canConnect ? '✅' : '❌';
 
     return (
         <article>
@@ -30,7 +30,7 @@ export const HueIpInput = () => {
                 maxLength="15"
                 onChange={updateHueIp}
                 placeholder='Set you hue hub IP'
-                defaultValue={hueIp} /> {!!hueIp && <span className="is-valid-flag">{isIpValudFlag}</span>}
+                defaultValue={hueIp} /> {connectionChecked && <span className="is-valid-flag">{canConnectFlag}</span>}
             {!hueIp && <details>
                 <summary>How to get the IP of your Hue Hub</summary>
                 <p>Open the Hue app on your phone, go to settings, and select the Hue Bridge you want to connect to. The IP address will be listed there.</p>
@@ -49,21 +49,31 @@ export const ConnectionCheck = () => {
         canConnect
     }, dispatch } = useHueContext()
 
-    const hueHubDebugUrl = `https://${hueIp}/debug/clip.html`;
+    const hueHubApiUrl = `https://${hueIp}/api`;
 
     useEffect(() => {
         if (!isManualChange) return;
-        console.log('hueIp', hueIp)
         dispatch({ dismissConnectionCheck: false, connectionChecked: false, canConnect: false});
     }, [hueIp])
 
+    useEffect(() => {
+        check()
+    }, [])
+
     const check = async () => {
+        let canConnect = false;
         dispatch({
             connectionChecked: false,
             connectionChecking: true,
             dismissConnectionCheck: false
         });
-        const canConnect = await invoke('check_hue_hub_connection', { hueHubDebugUrl });
+        const response = await invoke('get_api_key', { hueHubApiUrl });
+        try {
+            JSON.parse(response);
+            canConnect = true;
+        } catch (error) {
+            console.error(error);
+        }
         dispatch({
             connectionChecking: false,
             connectionChecked: true,
@@ -93,9 +103,9 @@ export const ConnectionCheck = () => {
 }
 
 export const ApiKeyCheck = () => {
-    const { state: { canConnect, apiKey }, dispatch } = useHueContext()
+    const { state: { hueIp, canConnect, apiKey, fetchingKey }, dispatch } = useHueContext()
 
-    console.log('canConnect', canConnect)
+    const hueHubApiUrl = `https://${hueIp}/api`;
 
     if (!canConnect) return null;
 
@@ -103,19 +113,19 @@ export const ApiKeyCheck = () => {
         dispatch({
             fetchingKey: true
         });
-        const canConnect = await invoke('check_hue_hub_connection', { hueHubDebugUrl });
+        const apiKey = await invoke('get_api_key', { hueHubApiUrl });
+        console.log(apiKey);
         dispatch({
-            connectionChecking: false,
-            connectionChecked: true,
-            canConnect
+            fetchingKey: false
         })
-        canConnect && setTimeout(() => dispatch({ dismissConnectionCheck: true }), 3500);
     }
+
+    const buttonCopy = fetchingKey ? 'Creating API key... ⏳' : 'Create API key';
 
     const noKey = <>
         <p>Go to your Hue Hub and press the button on the device,<br />
             then click the button below to generate an API key</p>
-        <button onClick={getApiKey}>Create API key</button>
+        <button disabled={fetchingKey} onClick={getApiKey}>{buttonCopy}</button>
     </>;
 
     return (

@@ -184,7 +184,7 @@ export const Footer = () => {
       <p>
         Made by <a target="_blank" href="https://simonerescio.it">Simone Rescio</a>,
         source on <a target="_blank" href="https://github.com/srescio/hue-cleaner">GitHub</a>,
-        but <a target="_blank" href="https://twitter.com/tweethue/status/1659153757379149828">why?</a>
+        but <a target="_blank" href="https://twitter.com/tweethue/status/1659272590114922503">why?</a>
       </p>
     </footer>
   )

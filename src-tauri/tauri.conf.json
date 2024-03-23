@@ -20,8 +20,8 @@
     "windows": [
       {
         "title": "hue Cleaner",
-        "width": 800,
-        "height": 600
+        "width": 500,
+        "height": 500
       }
     ],
     "security": {

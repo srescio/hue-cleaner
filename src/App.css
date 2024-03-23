@@ -1,13 +1,16 @@
-#root {
+html {
+  height: 100%;
+  background-image: radial-gradient(rgba(0,0,0,1), rgba(0,0,0,0)), url('/src/assets/huecleaner.jpeg');
+  background-repeat: no-repeat;
+  background-position: center top;
+  background-size: cover;
+}
+
+#root {  
   max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
-}
-
-.logo {
-  max-width: 25vw;
-  border: 1px solid black;
 }
 
 .hue {
@@ -21,6 +24,11 @@
 
 #hue-ip {
   width: 9rem;
+}
+
+#check-connection:disabled {
+  cursor: wait;
+  opacity: 0.7;
 }
 
 .is-valid-flag {

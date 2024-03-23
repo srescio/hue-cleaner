@@ -1,5 +1,4 @@
 import { useEffect } from 'react'
-import huecleanerImage from './assets/huecleaner.jpeg'
 import useHueContext from './Context'
 import { isIpValid } from './utils'
 import { invoke } from '@tauri-apps/api'
@@ -8,7 +7,6 @@ export const Header = () => {
   return (
     <header>
       <h1><span className='hue'>hue</span> Cleaner</h1>
-      <img src={huecleanerImage} className="logo" alt="Hue Cleaner" />
     </header>
   )
 }
@@ -29,12 +27,9 @@ export const HubIpInput = () => {
                 id="hue-ip"
                 maxLength="15"
                 onChange={updateHueIp}
-                placeholder='Set you hue hub IP'
+                placeholder='Set your hue Hub IP'
                 defaultValue={hueIp} /> {connectionChecked && <span className="is-valid-flag">{canConnectFlag}</span>}
-            {!hueIp && <details>
-                <summary>How to get the IP of your Hue Hub</summary>
-                <p>Open the Hue app on your phone, go to settings, and select the Hue Bridge you want to connect to. The IP address will be listed there.</p>
-            </details>}
+            {!hueIp && <p>Open the Hue app on your phone, go to settings, and select the Hue Bridge you want to connect to. The IP address will be listed there.</p>}
         </article>
     )
 }
@@ -61,6 +56,7 @@ export const ConnectionCheck = () => {
     }, [])
 
     const check = async () => {
+        if (connectionChecking) return;
         let canConnect = false;
         dispatch({
             connectionChecked: false,
@@ -89,20 +85,17 @@ export const ConnectionCheck = () => {
 
     return (
         <article>
-            {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button onClick={check}>Check connection</button>}
+            {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" disabled={connectionChecking} onClick={check}>Check connection 🛜</button>}
             {connectionChecking && <p>Checking connection to Hue Hub... ⏳</p>}
             {connectionChecked && (canConnect ? <p>Connection to Hue Hub successful! ✅</p> : <>
                 <p>Connection to Hue Hub failed! ❌</p>
-                <details>
-                    <summary>How to fix connection issues</summary>
-                    <p>Make sure your Hue Hub is powered on, connected to your network, and that you have the correct IP address.</p>
-                </details>
+                <p>Make sure your Hue Hub is powered on, connected to your network, and that you have the correct IP address.</p>
             </>)}
         </article>
     )
 }
 
-export const ApiKeyCheck = () => {
+export const ApiKey = () => {
     const { state: { hueIp, canConnect, apiKey }, dispatch } = useHueContext()
 
     const hueHubApiUrl = `https://${hueIp}/api`;
@@ -129,7 +122,7 @@ export const ApiKeyCheck = () => {
             }
         }, 5000, canConnect, apiKey);
         return () => clearInterval(interval);
-    }, [apiKey]);
+    }, [canConnect, apiKey]);
 
     const noKey = <p>Go to your Hue Hub and press the button on the device</p>;
 
@@ -140,10 +133,59 @@ export const ApiKeyCheck = () => {
     )
 }
 
+export const Clean = () => {
+    const { state: { hueIp, canConnect, apiKey, cleanedCount }, dispatch } = useHueContext()
+
+    const hueHubApiUrl = `https://${hueIp}/clip/v2/resource/entertainment_configuration`;
+    const threeHoursInMillis = 3 * 60 * 60 * 1000;
+
+    if (!canConnect || !apiKey) return null;
+
+    const getEntertainmentAreas = async () => {
+        let areas = null;
+        const response = await invoke('get_entertainment_areas', { hueHubApiUrl, apiKey });
+        try {
+            const jsonResponse = JSON.parse(response);
+            areas = jsonResponse?.data;
+        } catch (error) {
+            console.error(error);
+            dispatch({ apiKey: null })
+        }
+        console.log(areas)
+        return areas;
+    }
+
+    useEffect(() => {
+        const interval = setInterval(async (canConnect, apiKey) => {
+            if (canConnect && apiKey) {
+                const entertainmentAreas = await getEntertainmentAreas();
+                const trashAreas = entertainmentAreas?.filter(area => area.name.includes('Entertainment area'));
+
+                trashAreas.forEach(async area => {
+                    const response = await invoke('delete_entertainment_area', { hueHubApiUrl: `${hueHubApiUrl}/${area.id}`, apiKey });
+                    console.log(response)
+                })
+                const updatedCount = cleanedCount + trashAreas.length;
+                dispatch({ cleanedCount: updatedCount });
+                sessionStorage.setItem('cleanedCount', updatedCount);
+            }
+        }, threeHoursInMillis, canConnect, apiKey);
+        return () => clearInterval(interval);
+    }, [canConnect, apiKey]);
+
+    return (
+        <>{(cleanedCount > 1) && <p>✨ "Entertainment Areas" cleaned so far: {cleanedCount} ✨</p>}</>
+    )
+}
+
 export const Footer = () => {
   return (
     <footer>
-      <p>Made by <a target="_blank" href="https://simonerescio.it">Simone Rescio</a>, source on <a target="_blank" href="https://github.com/srescio/hue-cleaner">GitHub</a></p>
+      <p>
+        Made by <a target="_blank" href="https://simonerescio.it">Simone Rescio</a>,
+        source on <a target="_blank" href="https://github.com/srescio/hue-cleaner">GitHub</a>,
+        but <a target="_blank" href="https://twitter.com/tweethue/status/1659153757379149828">why?</a>
+      </p>
     </footer>
   )
 }

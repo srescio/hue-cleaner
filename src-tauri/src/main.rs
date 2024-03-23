@@ -27,9 +27,49 @@ async fn get_api_key(hue_hub_api_url: String) -> String {
     }
 }
 
+#[tauri::command]
+async fn get_entertainment_areas(hue_hub_api_url: String, api_key: String) -> String {
+    let client = ClientBuilder::new()
+        .timeout(std::time::Duration::from_secs(5))
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap();
+
+    let response = client.get(hue_hub_api_url)
+        .header("hue-application-key", api_key)
+        .send()
+        .await;
+    if let Ok(response) = response {
+        let json_response = response.text().await.unwrap();
+        json_response
+    } else {
+        "Unknown error occurred.".to_string()
+    }
+}
+
+#[tauri::command]
+async fn delete_entertainment_area(hue_hub_api_url: String, api_key: String) -> String {
+    let client = ClientBuilder::new()
+        .timeout(std::time::Duration::from_secs(5))
+        .danger_accept_invalid_certs(true)
+        .build()
+        .unwrap();
+
+    let response = client.delete(hue_hub_api_url)
+        .header("hue-application-key", api_key)
+        .send()
+        .await;
+    if let Ok(response) = response {
+        let json_response = response.text().await.unwrap();
+        json_response
+    } else {
+        "Unknown error occurred.".to_string()
+    }
+}
+
 fn main() {
     tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![get_api_key]) // Register get_api_key as an invokable handler
+        .invoke_handler(tauri::generate_handler![get_api_key, get_entertainment_areas, delete_entertainment_area]) // Register get_api_key as an invokable handler
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }

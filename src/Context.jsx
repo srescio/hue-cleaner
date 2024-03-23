@@ -14,12 +14,14 @@ export function HueContextProvider({ children }) {
     const hueIp = localStorage.getItem('hueIp');
     const canConnect = localStorage.getItem('canConnect') === 'true';
     const apiKey = localStorage.getItem('apiKey');
+    const cleanedCount = parseInt(localStorage.getItem('cleanedCount')) || 0;
 
     const initialState = {
         hueIp,
         isIpValid: isIpValid(hueIp),
         canConnect,
-        apiKey
+        apiKey,
+        cleanedCount
     };
 
     const [state, dispatch] = useReducer(hueReducer, initialState);

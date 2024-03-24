@@ -4,6 +4,12 @@ html {
   background-repeat: no-repeat;
   background-position: center top;
   background-size: cover;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+h1, p {
+  cursor: default;
 }
 
 #root {  

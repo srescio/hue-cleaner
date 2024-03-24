@@ -34,7 +34,7 @@ export const HubIpInput = () => {
     )
 }
 
-export const ConnectionCheck = () => {
+export const ConnectionCheck = ({children}) => {
     const { state: {
         hueIp,
         isManualChange,
@@ -55,7 +55,9 @@ export const ConnectionCheck = () => {
         check()
     }, [])
 
-    const check = async () => {
+    const check = async (e) => {
+        e?.preventDefault();
+        document.activeElement?.blur();
         if (connectionChecking) return;
         let canConnect = false;
         dispatch({
@@ -81,17 +83,20 @@ export const ConnectionCheck = () => {
         }, 3500);
     }
 
-    if (!hueIp || !isIpValid(hueIp) || dismissConnectionCheck) return null;
+    const hideConnectionCheck = !hueIp || !isIpValid(hueIp) || dismissConnectionCheck;
 
     return (
-        <article>
-            {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" type="submit" disabled={connectionChecking} onClick={check}>Check connection 🛜</button>}
-            {connectionChecking && <p>Checking connection to Hue Hub... ⏳</p>}
-            {connectionChecked && (canConnect ? <p>Connection to Hue Hub successful! ✅</p> : <>
-                <p>Connection to Hue Hub failed! ❌</p>
-                <p>Make sure your Hue Hub is powered on, connected to your network, and that you have the correct IP address.</p>
-            </>)}
-        </article>
+        <form onSubmit={check}>
+            {children}
+            {hideConnectionCheck ? null : <>
+                {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" type="submit" disabled={connectionChecking}>Check connection 🛜</button>}
+                {connectionChecking && <p>Checking connection to Hue Hub... ⏳</p>}
+                {connectionChecked && (canConnect ? <p>Connection to Hue Hub successful! ✅</p> : <>
+                    <p>Connection to Hue Hub failed! ❌</p>
+                    <p>Make sure your Hue Hub is powered on, connected to your network, and that you have the correct IP address.</p>
+                </>)}
+            </>}
+        </form>
     )
 }
 

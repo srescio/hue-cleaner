@@ -5,8 +5,9 @@ function App() {
   return (
     <>
       <Header />
-      <HubIpInput />
-      <ConnectionCheck />
+      <ConnectionCheck>
+        <HubIpInput />
+      </ConnectionCheck>
       <ApiKey />
       <Clean />
       <Footer />

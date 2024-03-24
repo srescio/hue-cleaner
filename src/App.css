@@ -19,7 +19,7 @@ h1, p {
   text-align: center;
 }
 
-.hue {
+#hue {
   background: -webkit-linear-gradient(left, red , yellow, green, blue);
   background: -o-linear-gradient(right, red , yellow, green, blue);
   background: -moz-linear-gradient(right, red , yellow, green, blue);

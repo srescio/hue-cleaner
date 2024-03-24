@@ -6,7 +6,7 @@ import { invoke } from '@tauri-apps/api'
 export const Header = () => {
   return (
     <header>
-      <h1><span className='hue'>hue</span> Cleaner</h1>
+      <h1><span id='hue'>hue</span> Cleaner</h1>
     </header>
   )
 }

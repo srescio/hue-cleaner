@@ -85,7 +85,7 @@ export const ConnectionCheck = () => {
 
     return (
         <article>
-            {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" disabled={connectionChecking} onClick={check}>Check connection 🛜</button>}
+            {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" type="submit" disabled={connectionChecking} onClick={check}>Check connection 🛜</button>}
             {connectionChecking && <p>Checking connection to Hue Hub... ⏳</p>}
             {connectionChecked && (canConnect ? <p>Connection to Hue Hub successful! ✅</p> : <>
                 <p>Connection to Hue Hub failed! ❌</p>

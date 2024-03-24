@@ -5,12 +5,10 @@ function App() {
   return (
     <>
       <Header />
-      <section>
-        <HubIpInput />
-        <ConnectionCheck />
-        <ApiKey />
-        <Clean />
-      </section>
+      <HubIpInput />
+      <ConnectionCheck />
+      <ApiKey />
+      <Clean />
       <Footer />
     </>
   )

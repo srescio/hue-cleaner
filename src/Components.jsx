@@ -88,8 +88,8 @@ export const ConnectionCheck = ({children}) => {
             canConnect
         })
         canConnect && setTimeout(() => {
-            dispatch({ dismissConnectionCheck: true })
             localStorage.setItem('canConnect', true)
+            dispatch({ dismissConnectionCheck: true })
         }, 3500);
     }
 
@@ -124,8 +124,8 @@ export const ApiKey = () => {
         } catch (error) {
             console.error(error);
         }
-        dispatch({ apiKey })
         localStorage.setItem('apiKey', apiKey)
+        dispatch({ apiKey })
     }
 
     useEffect(() => {

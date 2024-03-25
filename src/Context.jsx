@@ -11,7 +11,7 @@ export function HueContextProvider({ children }) {
         return { ...state, ...newState };
     }
 
-    const hueIp = localStorage.getItem('hueIp') || '';
+    const hueIp = localStorage.getItem('hueIp');
     const canConnect = localStorage.getItem('canConnect') === 'true';
     const apiKey = localStorage.getItem('apiKey');
     const cleanedCount = parseInt(localStorage.getItem('cleanedCount')) || 0;

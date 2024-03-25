@@ -2,6 +2,7 @@ import { useEffect } from 'react'
 import useHueContext from './Context'
 import { isIpValid } from './utils'
 import { invoke } from '@tauri-apps/api'
+import { enable, isEnabled, disable } from "tauri-plugin-autostart-api";
 
 export const Header = () => {
   return (
@@ -28,7 +29,7 @@ export const HubIpInput = () => {
                 maxLength="15"
                 onChange={updateHueIp}
                 placeholder='Set your hue Hub IP'
-                defaultValue={hueIp} /> {connectionChecked && <span className="is-valid-flag">{canConnectFlag}</span>}
+                defaultValue={hueIp} /> {(hueIp && connectionChecked) && <span className="is-valid-flag">{canConnectFlag}</span>}
             {!hueIp && <p>Open the Hue app on your phone, go to settings, and select the Hue Bridge you want to connect to. The IP address will be listed there.</p>}
         </article>
     )
@@ -181,6 +182,34 @@ export const Clean = () => {
     return (
         <>{(cleanedCount > 1) && <p>✨ "Entertainment Areas" cleaned so far: {cleanedCount} ✨</p>}</>
     )
+}
+
+export const Autostart = () => {
+    const { state: { autostart }, dispatch } = useHueContext()
+
+    useEffect(() => {
+        isEnabled().then((enabled) => {
+            dispatch({ autostart: enabled })
+        })
+    }, [])
+
+    const change = (e) => {
+        if (e.target.checked) {
+            enable().then(() => {
+                dispatch({ autostart: true })
+            })
+        } else {
+            disable().then(() => {
+                dispatch({ autostart: false })
+            })
+        }
+    }
+    return (<>
+    <label>
+        <input type="checkbox" id="autostart" onChange={change} checked={autostart} />
+        <span>Start with system</span>
+    </label>
+    </>)
 }
 
 export const Footer = () => {

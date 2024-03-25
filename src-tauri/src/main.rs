@@ -2,6 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use reqwest::ClientBuilder;
+use tauri_plugin_autostart::MacosLauncher;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -69,6 +70,7 @@ async fn delete_entertainment_area(hue_hub_api_url: String, api_key: String) -> 
 
 fn main() {
     tauri::Builder::default()
+        .plugin(tauri_plugin_autostart::init(MacosLauncher::LaunchAgent, Some(vec![])))
         .invoke_handler(tauri::generate_handler![get_api_key, get_entertainment_areas, delete_entertainment_area]) // Register get_api_key as an invokable handler
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

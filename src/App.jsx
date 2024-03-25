@@ -1,4 +1,4 @@
-import { Header, HubIpInput, ConnectionCheck, Footer, ApiKey, Clean } from './Components'
+import { Header, HubIpInput, ConnectionCheck, Footer, ApiKey, Clean, Autostart } from './Components'
 import './App.css'
 
 function App() {
@@ -10,6 +10,7 @@ function App() {
       </ConnectionCheck>
       <ApiKey />
       <Clean />
+      <Autostart />
       <Footer />
     </>
   )

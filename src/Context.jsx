@@ -20,7 +20,8 @@ export function HueContextProvider({ children }) {
         hueIp,
         isIpValid: isIpValid(hueIp),
         canConnect,
-        apiKey,
+        apiKey: !['undefined', 'null', 'false'].includes(apiKey) ? apiKey : null,
+        autostart: false,
         cleanedCount
     };
 

@@ -53,6 +53,15 @@ export const ConnectionCheck = ({children}) => {
     }, [hueIp])
 
     useEffect(() => {
+        const interval = setInterval((hueIp, connectionChecked, canConnect) => {
+            if (hueIp && connectionChecked && !canConnect) {
+                check()
+            }
+        }, 5000, hueIp, connectionChecked, canConnect);
+        return () => clearInterval(interval);
+    }, [hueIp, connectionChecked, canConnect])
+
+    useEffect(() => {
         check()
     }, [])
 
@@ -106,8 +115,6 @@ export const ApiKey = () => {
 
     const hueHubApiUrl = `https://${hueIp}/api`;
 
-    if (!canConnect) return null;
-
     const getApiKey = async () => {
         let apiKey = false;
         const response = await invoke('get_api_key', { hueHubApiUrl });
@@ -120,7 +127,7 @@ export const ApiKey = () => {
         dispatch({ apiKey })
         localStorage.setItem('apiKey', apiKey)
     }
-    
+
     useEffect(() => {
         const interval = setInterval((canConnect, apiKey) => {
             if (canConnect && !apiKey) {
@@ -130,12 +137,10 @@ export const ApiKey = () => {
         return () => clearInterval(interval);
     }, [canConnect, apiKey]);
 
-    const noKey = <p>Go to your Hue Hub and press the button on the device</p>;
+    if (!canConnect || apiKey) return null;
 
     return (
-        <article>
-            {!apiKey && noKey}
-        </article>
+        <p>Go to your Hue Hub and press the button on the device</p>
     )
 }
 
@@ -144,8 +149,6 @@ export const Clean = () => {
 
     const hueHubApiUrl = `https://${hueIp}/clip/v2/resource/entertainment_configuration`;
     const threeHoursInMillis = 3 * 60 * 60 * 1000;
-
-    if (!canConnect || !apiKey) return null;
 
     const getEntertainmentAreas = async () => {
         let areas = null;
@@ -161,23 +164,29 @@ export const Clean = () => {
         return areas;
     }
 
-    useEffect(() => {
-        const interval = setInterval(async (canConnect, apiKey) => {
-            if (canConnect && apiKey) {
-                const entertainmentAreas = await getEntertainmentAreas();
-                const trashAreas = entertainmentAreas?.filter(area => area.name.includes('Entertainment area'));
+    const cleanTrashAreas = async () => {
+        if (!canConnect || !apiKey) {
+            return;
+        }
+        const entertainmentAreas = await getEntertainmentAreas();
+        const trashAreas = entertainmentAreas?.filter(area => area.name.includes('Entertainment area'));
 
-                trashAreas.forEach(async area => {
-                    const response = await invoke('delete_entertainment_area', { hueHubApiUrl: `${hueHubApiUrl}/${area.id}`, apiKey });
-                    console.log(response)
-                })
-                const updatedCount = cleanedCount + trashAreas.length;
-                dispatch({ cleanedCount: updatedCount });
-                sessionStorage.setItem('cleanedCount', updatedCount);
-            }
-        }, threeHoursInMillis, canConnect, apiKey);
+        trashAreas.forEach(async area => {
+            const response = await invoke('delete_entertainment_area', { hueHubApiUrl: `${hueHubApiUrl}/${area.id}`, apiKey });
+            console.log(response)
+        })
+        const updatedCount = cleanedCount + trashAreas.length;
+        dispatch({ cleanedCount: updatedCount });
+        sessionStorage.setItem('cleanedCount', updatedCount);
+    }
+
+    useEffect(() => {
+        cleanTrashAreas();
+        const interval = setInterval(cleanTrashAreas, threeHoursInMillis);
         return () => clearInterval(interval);
     }, [canConnect, apiKey]);
+
+    if (!canConnect || !apiKey) return null;
 
     return (
         <>{(cleanedCount > 1) && <p>✨ "Entertainment Areas" cleaned so far: {cleanedCount} ✨</p>}</>

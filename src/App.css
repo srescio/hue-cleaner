@@ -48,9 +48,9 @@ button {
   margin: 1rem auto;
 }
 
-details {
+label {
   margin-top: 2rem;
-  font-size: 1rem;
+  display: block;
 }
 
 footer {

@@ -169,15 +169,15 @@ export const Clean = () => {
             return;
         }
         const entertainmentAreas = await getEntertainmentAreas();
-        const trashAreas = entertainmentAreas?.filter(area => area.name.includes('Entertainment area'));
+        const trashAreas = entertainmentAreas?.filter(area => area.name.includes('Entertainment area') && area.status.includes('inactive'));
 
         trashAreas.forEach(async area => {
             const response = await invoke('delete_entertainment_area', { hueHubApiUrl: `${hueHubApiUrl}/${area.id}`, apiKey });
             console.log(response)
         })
         const updatedCount = cleanedCount + trashAreas.length;
-        dispatch({ cleanedCount: updatedCount });
         sessionStorage.setItem('cleanedCount', updatedCount);
+        dispatch({ cleanedCount: updatedCount });
     }
 
     useEffect(() => {

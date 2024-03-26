@@ -176,7 +176,7 @@ export const Clean = () => {
             console.log(response)
         })
         const updatedCount = cleanedCount + trashAreas.length;
-        sessionStorage.setItem('cleanedCount', updatedCount);
+        localStorage.setItem('cleanedCount', updatedCount);
         dispatch({ cleanedCount: updatedCount });
     }
 

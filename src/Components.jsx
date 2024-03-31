@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import useHueContext from './Context'
-import { isIpValid, hubConnectionCheck } from './utils'
+import { isIpValid, hubConnectionCheck, wait } from './utils'
 import { invoke } from '@tauri-apps/api'
 import { enable, isEnabled, disable } from "tauri-plugin-autostart-api";
 import moment from 'moment';
@@ -57,7 +57,7 @@ export const ConnectionCheck = ({children}) => {
             if (hueIp && connectionChecked && !canConnect) {
                 check()
             }
-        }, 5000, hueIp, connectionChecked, canConnect);
+        }, 10000, hueIp, connectionChecked, canConnect);
         return () => clearInterval(interval);
     }, [hueIp, connectionChecked, canConnect])
 
@@ -76,6 +76,8 @@ export const ConnectionCheck = ({children}) => {
             dismissConnectionCheck: false
         });
         canConnect = await hubConnectionCheck(hueIp);
+        // wait for one second to avoid content flashing when response is ultra fast
+        await wait(1000);
         dispatch({
             connectionChecking: false,
             connectionChecked: true,
@@ -136,8 +138,9 @@ export const ApiKey = () => {
 }
 
 export const Clean = () => {
-    const { state: { hueIp, canConnect, apiKey, cleanedCount, nextClean }, dispatch } = useHueContext()
+    const { state: { hueIp, canConnect, apiKey, cleanedCount, cleanedRun, nextClean }, dispatch } = useHueContext()
 
+    let cleanInterval;
     const hueHubApiUrl = `https://${hueIp}/clip/v2/resource/entertainment_configuration`;
     const twoHoursInMillis = 2 * 60 * 60 * 1000;
 
@@ -162,7 +165,7 @@ export const Clean = () => {
             dispatch({ canConnect: false });
             return;
         }
-        
+
         const entertainmentAreas = await getEntertainmentAreas();
         const trashAreas = entertainmentAreas?.filter(area => area.name.includes('Entertainment area') && area.status.includes('inactive'));
 
@@ -170,26 +173,45 @@ export const Clean = () => {
             const response = await invoke('delete_entertainment_area', { hueHubApiUrl: `${hueHubApiUrl}/${area.id}`, apiKey });
             console.log(response)
         })
-        const nextClean = moment().add(2, 'hours').format('HH:mm');
-        dispatch({ nextClean });
         if (!trashAreas?.length) return;
         const updatedCount = cleanedCount + trashAreas.length;
         localStorage.setItem('cleanedCount', updatedCount);
-        dispatch({ cleanedCount: updatedCount });
+        dispatch({ cleanedCount: updatedCount, cleanedRun: trashAreas.length });
+    }
 
+    const updateNextClean = () => {
+        const nextClean = moment().add(2, 'hours').format('HH:mm');
+        dispatch({ nextClean });
+    }
+
+    const setCleanIntervalAndRun = () => {
+        cleanTrashAreas();
+        updateNextClean();
+        cleanInterval = setInterval(() => {
+            cleanTrashAreas();
+            updateNextClean();
+        }, twoHoursInMillis);
+    }
+
+    const handleCleanNow = () => {
+        setTimeout(() => {
+            cleanTrashAreas();
+            updateNextClean();
+        }, 3000);
+        clearInterval(cleanInterval);
+        setCleanIntervalAndRun();
     }
 
     useEffect(() => {
-        cleanTrashAreas();
-        const interval = setInterval(cleanTrashAreas, twoHoursInMillis);
-        return () => clearInterval(interval);
+        setCleanIntervalAndRun();
+        return () => clearInterval(cleanInterval);
     }, [canConnect, apiKey]);
 
     return (
         <>
             {(cleanedCount > 1) && <p>✨ "Entertainment Areas" cleaned so far: {cleanedCount} ✨</p>}
             {nextClean && <p>🧹 Next cleaning will happen automatically at {nextClean}... ⏱️</p>}
-            {nextClean && <p>Or <button onClick={cleanTrashAreas}>Clean Now 🧹</button></p>}
+            {nextClean && <p>Or <button onClick={handleCleanNow}>Clean Now 🧹</button></p>}
         </>
     )
 }

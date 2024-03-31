@@ -2,6 +2,8 @@ import { invoke } from '@tauri-apps/api'
 
 export const isIpValid = (ip) => !!ip?.match(/^((25[0-5]|(2[0-4]|1\d|[1-9]|)\d)\.?\b){4}$/);
 
+export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
 export const hubConnectionCheck = async (hueIp) => {
     const hueHubApiUrl = `https://${hueIp}/api`;
     const response = await invoke('get_api_key', { hueHubApiUrl });

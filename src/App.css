@@ -51,6 +51,7 @@ button {
 label {
   margin-top: 2rem;
   display: block;
+  cursor: pointer;
 }
 
 footer {

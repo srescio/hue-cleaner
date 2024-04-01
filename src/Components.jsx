@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import useHueContext from './Context'
 import { isIpValid, hubConnectionCheck, wait } from './utils'
 import { invoke } from '@tauri-apps/api'
@@ -138,11 +138,12 @@ export const ApiKey = () => {
 }
 
 export const Clean = () => {
-    const { state: { hueIp, canConnect, apiKey, cleanedCount, cleanedRun, nextClean }, dispatch } = useHueContext()
+    const { state: { hueIp, canConnect, apiKey, cleanedCount, nextClean, cleanClicked }, dispatch } = useHueContext()
 
     let cleanInterval;
     const hueHubApiUrl = `https://${hueIp}/clip/v2/resource/entertainment_configuration`;
     const twoHoursInMillis = 2 * 60 * 60 * 1000;
+    const cleanButtonCopy = cleanClicked ? 'Cleaning... 🧹' : 'Clean Now 🧹';
 
     const getEntertainmentAreas = async () => {
         let areas = null;
@@ -180,7 +181,7 @@ export const Clean = () => {
 
         const updatedCount = cleanedCount + trashAreas.length;
         localStorage.setItem('cleanedCount', updatedCount);
-        dispatch({ cleanedCount: updatedCount, cleanedRun: trashAreas.length });
+        dispatch({ cleanedCount: updatedCount });
     }
 
     const updateNextClean = () => {
@@ -198,10 +199,10 @@ export const Clean = () => {
     }
 
     const handleCleanNow = () => {
+        dispatch({ cleanClicked: true });
         setTimeout(() => {
-            cleanTrashAreas();
-            updateNextClean();
-        }, 3000);
+            dispatch({ cleanClicked: false });
+        }, 2000);
         clearInterval(cleanInterval);
         setCleanIntervalAndRun();
     }
@@ -215,7 +216,7 @@ export const Clean = () => {
         <>
             {(cleanedCount > 1) && <p>✨ "Entertainment Areas" cleaned so far: {cleanedCount} ✨</p>}
             {nextClean && <p>🧹 Next cleaning will happen automatically at {nextClean}... ⏱️</p>}
-            {nextClean && <p>Or <button onClick={handleCleanNow}>Clean Now 🧹</button></p>}
+            {nextClean && <p>Or <button disabled={cleanClicked} onClick={handleCleanNow}>{cleanButtonCopy}</button></p>}
         </>
     )
 }

@@ -94,7 +94,7 @@ export const ConnectionCheck = ({children}) => {
         <form onSubmit={check}>
             {children}
             {hideConnectionCheck ? null : <>
-                {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" type="submit" disabled={connectionChecking}>Check connection 🛜</button>}
+                {(hueIp && isIpValid(hueIp) && !canConnect) &&  <button id="check-connection" type="submit" disabled={connectionChecking}>Check connection 📡</button>}
                 {connectionChecking && <p>Checking connection to Hue Hub... ⏳</p>}
                 {connectionChecked && (canConnect ? <p>Connection to Hue Hub successful! ✅</p> : <>
                     <p>Connection to Hue Hub failed! ❌</p>

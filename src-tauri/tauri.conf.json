@@ -23,7 +23,7 @@
     "windows": [
       {
         "title": "hue Cleaner",
-        "width": 500,
+        "width": 520,
         "height": 500,
         "titleBarStyle": "Overlay"
       }

@@ -21,7 +21,7 @@ describe('isIpValid', () => {
 
 describe('wait', () => {
     it('should wait for the specified time', async () => {
-        const delay = 1000;
+        const delay = 500;
         const startTime = Date.now();
         await wait(delay);
         const endTime = Date.now();

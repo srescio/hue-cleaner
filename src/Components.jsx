@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import useHueContext from './Context'
 import { isIpValid, hubConnectionCheck, wait } from './utils'
 import { invoke } from '@tauri-apps/api'

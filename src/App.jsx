@@ -12,8 +12,7 @@ function App() {
       <ConnectionCheck>
         <HubIpInput />
       </ConnectionCheck>
-      {(canConnect && !apiKey) && <ApiKey />}
-      {(canConnect && apiKey) && <Clean />}
+      {canConnect && (apiKey ? <Clean /> : <ApiKey />)}
       <Autostart />
       <Footer />
     </>

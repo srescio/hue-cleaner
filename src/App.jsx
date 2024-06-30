@@ -4,8 +4,7 @@ import useHueContext from './Context'
 import './App.css'
 
 function App() {
-  const { state: { hueIp, canConnect, apiKey }, dispatch } = useHueContext();
-  console.log('App', { hueIp, canConnect, apiKey });
+  const { state: { canConnect, apiKey } } = useHueContext();
 
   return (
     <>

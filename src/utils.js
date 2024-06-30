@@ -16,3 +16,18 @@ export const hubConnectionCheck = async (hueIp) => {
     }
     return false;
 }
+
+export const fetchApiKey = async (hueIp) => {
+    const hueHubApiUrl = `https://${hueIp}/api`;
+    let jsonResponse = null;
+    const response = await invoke('get_api_key', { hueHubApiUrl });
+    try {
+        jsonResponse = JSON.parse(response);
+    } catch (error) {
+        console.error(error);
+    }
+
+    const apiKey = jsonResponse?.at(0)?.success?.username;
+
+    return apiKey ?? false;
+}

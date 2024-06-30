@@ -1,5 +1,5 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { isIpValid, wait, hubConnectionCheck } from '../utils';
+import { describe, it, expect } from 'vitest';
+import { isIpValid, wait, hubConnectionCheck, fetchApiKey } from '../utils';
 import { mockIPC } from "@tauri-apps/api/mocks";
 
 describe('isIpValid', () => {
@@ -75,6 +75,53 @@ describe('hubConnectionCheck', () => {
           });
         // WHEN
         const result = await hubConnectionCheck(testIp);
+        // THEN
+        expect(result).toBe(false);
+    });
+});
+
+describe('fetchApiKey', () => {
+    it('should return the API key when Tauri invoke returns a successful response', async () => {
+        // GIVEN
+        const invokeSuccessResponse = JSON.stringify([{ success: { username: 'api_key' } }]);
+        const testIp = '192.168.0.1';
+        mockIPC((cmd, args) => {
+            expect(cmd).toBe('get_api_key');
+            expect(args).toEqual({ hueHubApiUrl: `https://${testIp}/api` });
+            return invokeSuccessResponse;
+        });
+        // WHEN
+        const result = await fetchApiKey(testIp);
+        // THEN
+        expect(result).toBe('api_key');
+    });
+
+    it('should return false when Tauri invoke returns an error response', async () => {
+        // GIVEN
+        const invokeErrorResponse = JSON.stringify([{ error: { type: 101 } }]);
+        const testIp = '192.168.0.1';
+        mockIPC((cmd, args) => {
+            expect(cmd).toBe('get_api_key');
+            expect(args).toEqual({ hueHubApiUrl: `https://${testIp}/api` });
+            return invokeErrorResponse;
+        });
+        // WHEN
+        const result = await fetchApiKey(testIp);
+        // THEN
+        expect(result).toBe(false);
+    });
+
+    it('should return false when Tauri invoke cannot parse the response', async () => {
+        // GIVEN
+        const invokeErrorKoResponse = JSON.stringify('error');
+        const testIp = '192.168.0.1';
+        mockIPC((cmd, args) => {
+            expect(cmd).toBe('get_api_key');
+            expect(args).toEqual({ hueHubApiUrl: `https://${testIp}/api` });
+            return invokeErrorKoResponse;
+        });
+        // WHEN
+        const result = await fetchApiKey(testIp);
         // THEN
         expect(result).toBe(false);
     });

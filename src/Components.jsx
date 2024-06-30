@@ -1,6 +1,6 @@
 import { useEffect } from 'react'
 import useHueContext from './Context'
-import { isIpValid, hubConnectionCheck, wait } from './utils'
+import { isIpValid, hubConnectionCheck, fetchApiKey, wait } from './utils'
 import { invoke } from '@tauri-apps/api'
 import { enable, isEnabled, disable } from "tauri-plugin-autostart-api";
 import moment from 'moment';
@@ -108,27 +108,19 @@ export const ConnectionCheck = ({children}) => {
 export const ApiKey = () => {
     const { state: { hueIp }, dispatch } = useHueContext();
 
-    const hueHubApiUrl = `https://${hueIp}/api`;
+    const getApiKey = async (hueIp) => {
+        const apiKey = await fetchApiKey(hueIp);
 
-    const getApiKey = async () => {
-        let apiKey = false;
-        let jsonResponse = null;
-        const response = await invoke('get_api_key', { hueHubApiUrl });
-        try {
-            jsonResponse = JSON.parse(response);
-        } catch (error) {
+        if (apiKey) {
+            localStorage.setItem('apiKey', apiKey);
+            dispatch({ apiKey });
+        } else {
             dispatch({ canConnect: false });
-            console.error(error);
         }
-
-        apiKey = jsonResponse?.at(0)?.success?.username;
-        if (!apiKey) return;
-        localStorage.setItem('apiKey', apiKey);
-        dispatch({ apiKey });
     }
 
     useEffect(() => {
-        const interval = setInterval(getApiKey, 5000);
+        const interval = setInterval(() => getApiKey(hueIp), 5000);
         return () => clearInterval(interval);
     }, []);
 

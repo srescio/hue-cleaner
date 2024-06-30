@@ -7,9 +7,10 @@ export const wait = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 export const hubConnectionCheck = async (hueIp) => {
     const hueHubApiUrl = `https://${hueIp}/api`;
     const response = await invoke('get_api_key', { hueHubApiUrl });
+
     try {
         const jsonResponse = JSON.parse(response);
-        return jsonResponse.at(0).error.type === 101 || !!jsonResponse.at(0).success.username;
+        return jsonResponse.at(0)?.error?.type === 101 || !!jsonResponse.at(0)?.success?.username;
     } catch (error) {
         console.error(error);
     }
